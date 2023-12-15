@@ -3,11 +3,14 @@ package net.registration.dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 import net.registration.model.Employee;
 
 public class EmployeeDao{
 
+	//to register new employee
 	public int registerEmployee(Employee employee) throws ClassNotFoundException{
 		
 		String registerQuery = "insert into employees"
@@ -54,5 +57,38 @@ public class EmployeeDao{
 		
 		return res;
 	}
-
+	
+	//to get all employees
+	public ResultSet getEmployeeData() throws ClassNotFoundException {
+		
+		String getQuery = "select first_name, last_name, username, address, contact from employees";
+		
+		Class.forName("com.mysql.cj.jdbc.Driver");
+		
+		Connection con = null;
+		Statement s = null;
+		ResultSet rs;
+		
+		try {
+			
+			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/registration_page_jsp","root","password");
+			s = con.createStatement();
+			rs = s.executeQuery(getQuery);
+			return rs;
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				s.close();
+				con.close();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
+		
+	}
+	
 }
