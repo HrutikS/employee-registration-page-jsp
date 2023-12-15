@@ -1,6 +1,7 @@
 package net.registration.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -22,26 +23,20 @@ public class EmployeeServlet extends HttpServlet {
     
 	private EmployeeDao employeeDao = new EmployeeDao();
 	
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
     public EmployeeServlet() {
         super();
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().append("Served at :").append(request.getContextPath());
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeRegister.jsp");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeRegister.jsp");
 		dispatcher.forward(request, response);
-	}
+    }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
+    //need doPost as jsp has method as post
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter out = response.getWriter();
+		
 		// Getting info from request
 		String firstName = request.getParameter("firstName");
 		String lastName = request.getParameter("lastName");
@@ -61,14 +56,30 @@ public class EmployeeServlet extends HttpServlet {
 
 		// Passing employee to dao
 		try {
-			employeeDao.registerEmployee(employee);
+			int result = employeeDao.registerEmployee(employee);
+			if(result > 0) {
+				//to print success message on registration page
+				response.setContentType("text/html");
+				out.print("<h3 style='color:green' align='center'>User registered successfully !!</h3>");
+				RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeRegister.jsp");
+				dispatcher.include(request, response);
+			}else {
+				//to print not success message on registration page
+				response.setContentType("text/html");
+				out.print("<h3 style='color:red' align='center'>User not registered due to some error !!</h3>");
+				RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeRegister.jsp");
+				dispatcher.include(request, response);
+			}
+			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+			//to print exception message on registration page
+			response.setContentType("text/html");
+			out.print("<h3 style='color:red' align='center'> Exception occured : "+ e.getMessage() +"  !!</h3>");
+			RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeRegister.jsp");
+			dispatcher.include(request, response);
 		}
 
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/employeeDetails.jsp");
-		dispatcher.forward(request, response);
-//		response.sendRedirect("employeedetails.jsp");
 	}
 
 }
